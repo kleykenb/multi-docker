@@ -1,0 +1,18 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t benny/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run benny/react-test npm test -- --coverage 
+
+after_success:
+  - docker build -t benny/mutli-client ./client
+  - docker build -t benny/mutli-nginx ./nginx
+  - docker build -t benny/mutli-server ./server
+  - docker build -t benny/mutli-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push kleykenb/multi-client
+  - docker push kleykenb/multi-server
+  - docker push kleykenb/multi-worker
+  - docker push kleykenb/multi-nginx
